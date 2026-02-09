@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <!--androidx.appcompat.widget.Toolbar
+            android:id="@+id/logjobsListActivityActionBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:elevation="4dp" /-->
+
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/bg_normal"
+            app:elevation="0dp">
+
+            <androidx.appcompat.widget.Toolbar
+                android:id="@+id/logjobsListActivityActionBar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone"
+                app:contentInsetStartWithNavigation="0dp"
+                app:navigationIcon="@drawable/ic_arrow_back_grey600_24dp"
+                app:titleMarginStart="0dp"
+                tools:title="@string/app_name">
+
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/search_view"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </androidx.appcompat.widget.Toolbar>
+
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/home_toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/spacer_1x"
+                android:layout_marginTop="@dimen/spacer_1hx"
+                android:layout_marginEnd="@dimen/spacer_1x"
+                android:layout_marginBottom="@dimen/spacer_1hx"
+                app:cardBackgroundColor="@color/appbar"
+                app:cardCornerRadius="@dimen/spacer_1x"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <androidx.appcompat.widget.AppCompatImageButton
+                        android:id="@+id/menu_button"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:paddingStart="@dimen/spacer_1x"
+                        android:paddingTop="@dimen/spacer_2x"
+                        android:paddingEnd="@dimen/spacer_1x"
+                        android:paddingBottom="@dimen/spacer_2x"
+                        android:tint="?attr/colorAccent"
+                        app:srcCompat="@drawable/ic_baseline_menu_24" />
+
+                    <com.google.android.material.textview.MaterialTextView
+                        android:id="@+id/search_text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginStart="@dimen/spacer_1x"
+                        android:layout_marginEnd="@dimen/spacer_1x"
+                        android:layout_weight="1"
+                        android:textColor="@color/fg_default"
+                        android:ellipsize="end"
+                        android:gravity="start"
+                        android:lines="1"
+                        android:textSize="16sp"
+                        android:text="@string/action_search" />
+
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/launchAccountSwitcher"
+                        android:layout_width="?attr/actionBarSize"
+                        android:layout_height="?attr/actionBarSize"
+                        android:layout_gravity="center_vertical|end"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:padding="12dp"
+                        android:tooltipText="@string/manage_accounts"
+                        app:srcCompat="@drawable/ic_account_circle_grey_24dp"
+                        tools:targetApi="o" />
+                </LinearLayout>
+
+            </com.google.android.material.card.MaterialCardView>
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:tools="http://schemas.android.com/tools"
+            android:id="@+id/swiperefreshlayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/bg_normal"
+            tools:context="net.eneiluj.nextcloud.phonetrack.android.activity.LogjobsListViewActivity"
+            tools:ignore="MergeRootFrame">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/bg_normal"
+                android:scrollbars="vertical" />
+
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    </LinearLayout>
+
+    <com.github.clans.fab.FloatingActionMenu
+        android:id="@+id/floatingMenu"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        fab:menu_labels_ellipsize="end"
+        fab:menu_labels_singleLine="true"
+        fab:menu_fab_label="@string/simple_cancel"
+        fab:menu_backgroundColor="@color/bg_normal_transparent"
+        fab:menu_animationDelayPerItem="0"
+        fab:menu_colorNormal="@color/primary"
+        fab:menu_colorPressed="@color/primary"
+        fab:menu_colorRipple="#ffffff"
+        android:padding="8dp">
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_create_session"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_add_white_24dp"
+            fab:fab_size="normal"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary"
+            app:fab_showAnimation="@anim/fab_slide_in_from_right"
+            app:fab_hideAnimation="@anim/fab_slide_out_to_right"
+            fab:fab_label="@string/fab_create_session"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_create_phonetrack"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_notify_24dp"
+            fab:fab_size="normal"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary"
+            app:fab_showAnimation="@anim/fab_slide_in_from_right"
+            app:fab_hideAnimation="@anim/fab_slide_out_to_right"
+            fab:fab_label="@string/fab_create_phonetrack"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_create_maps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_location_on_white_24dp"
+            fab:fab_size="normal"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary"
+            app:fab_showAnimation="@anim/fab_slide_in_from_right"
+            app:fab_hideAnimation="@anim/fab_slide_out_to_right"
+            fab:fab_label="@string/fab_create_maps"/>
+
+        <com.github.clans.fab.FloatingActionButton
+            android:id="@+id/fab_create_custom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_link_white_24dp"
+            fab:fab_size="normal"
+            app:fab_colorNormal="@color/primary"
+            app:fab_colorPressed="@color/primary"
+            app:fab_showAnimation="@anim/fab_slide_in_from_right"
+            app:fab_hideAnimation="@anim/fab_slide_out_to_right"
+            fab:fab_label="@string/fab_create_custom"/>
+
+    </com.github.clans.fab.FloatingActionMenu>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

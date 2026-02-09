@@ -1,0 +1,76 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdk 35
+    // buildToolsVersion '29.0.3'
+    defaultConfig {
+        applicationId "net.eneiluj.nextcloud.phonetrack"
+        minSdkVersion 26
+        targetSdkVersion 35
+        versionCode 21
+        versionName "0.1.1"
+        vectorDrawables.useSupportLibrary true
+        resValue "string", "applicationId", applicationId
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        coreLibraryDesugaringEnabled true
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+    productFlavors {
+        normal {
+            // yes this is repeated
+            resValue "string", "app_name", "PhoneTrack"
+        }
+        dev {
+            applicationId 'net.eneiluj.nextcloud.phonetrack.dev'
+            resValue "string", "applicationId", applicationId
+            resValue "string", "app_name", "PhoneTrack Dev"
+        }
+        play {
+            applicationId "net.eneiluj.nextcloud.phonetrack.play"
+            resValue "string", "applicationId", applicationId
+            resValue "string", "app_name", "PhoneTrack"
+        }
+    }
+    flavorDimensions "default"
+    // solves cert4android crash
+    dataBinding {
+        enabled = true
+    }
+    lint {
+        abortOnError false
+        disable 'MissingTranslation'
+    }
+    namespace 'net.eneiluj.nextcloud.phonetrack'
+}
+
+dependencies {
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'
+    // implementation project(':cert4android')
+    implementation 'com.github.bitfireAT:cert4android:7814052'
+
+    implementation 'com.github.clans:fab:1.6.4'
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation "com.google.android.material:material:1.12.0"
+    implementation "androidx.recyclerview:recyclerview:1.4.0"
+    implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.1.0"
+    // needed for cert4android (conflict resolution)
+    implementation "androidx.cardview:cardview:1.0.0"
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    androidTestImplementation 'junit:junit:4.13.2'
+    implementation 'org.osmdroid:osmdroid-android:6.1.18'
+    implementation 'org.osmdroid:osmdroid-mapsforge:6.1.18'
+    implementation 'com.github.kizitonwose.colorpreference:support:1.0.6'
+    implementation 'com.larswerkman:lobsterpicker:1.0.1'
+    implementation 'com.github.nextcloud:Android-SingleSignOn:1.1.0'
+    implementation 'com.google.code.gson:gson:2.11.0'
+    // implementation 'com.codebutchery.android:gpx_lib:1.0.2'
+}

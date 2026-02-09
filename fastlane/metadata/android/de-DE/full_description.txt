@@ -1,0 +1,38 @@
+PhoneTrack ist eine Anwendung zur kontinuierlichen Protokollierung von Standortkoordinaten.
+Die Anwendung wird im Hintergrund ausgeführt. Datenpunkte werden mit der gewählten Häufigkeit gespeichert und
+in Echtzeit auf einen Server hochgeladen. Diese Protokollierung funktioniert mit
+[https://gitlab.com/eneiluj/phonetrack-oc PhoneTrack Nextcloud App] oder eine beliebige
+benutzerdefinierter Server (GET- oder POST-HTTP-Anfragen). PhoneTrack App kann auch per
+SMS ferngesteuert werden.
+
+
+# Funktionen
+
+• Protokollierung an mehrere Ziele mit mehreren Einstellungen (Häufigkeit, min. Abstand, min. Genauigkeit, deutliche Bewegung)
+• Protokollierung in PhoneTrack-Nextcloud-App (PhoneTrack-Protokollierungsaufgabe)
+• Protokollierung zu jedem Server, der HTTP GET- oder POST-Anfragen empfangen kann (benutzerdefinierte Protokollierungsaufgabe)
+• Speichert auch dann Standorte, wenn Netzwerk nicht verfügbar ist
+• Fernsteuerung per SMS:
+    • Position abrufen
+    • Benachrichtigungen auslösen
+    • Starten aller Protokollierungsaufträge
+    • Beenden aller Protokollierungsaufträge
+    • Erstellen eines Protokollierungsauftrags
+• Beim Systemstart starten
+• Ermöglicht das Anzeigen von Geräten einer Nextcloud-PhoneTrack-Sitzung auf einer Karte
+• Dunkle Farbgestaltung
+- Mehrsprachige Benutzeroberfläche (übersetzt auf https://crowdin.com/project/phonetrack)
+
+# Voraussetzungen
+
+Wenn Sie an eine Nextcloud PhoneTrack-App protokollieren möchten:
+
+- Nextcloud-Instanz wird ausgeführt
+- Nextcloud PhoneTrack App aktiviert
+
+Ansonsten keine weiteren Voraussetzungen! (Außer Android ≧ 4.1)
+
+# Alternativen
+
+Wenn Ihnen diese App nicht gefällt und Sie nach Alternativen suchen: Werfen Sie einen Blick auf die Protokollierungsmethoden/Apps
+im PhoneTrack-Wiki: https://gitlab.com/eneiluj/phonetrack-oc/wikis/userdoc#logging-methods

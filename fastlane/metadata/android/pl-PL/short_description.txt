@@ -1,0 +1,1 @@
+Rejestrowanie pozycji w aplikacji PhoneTrack Nextcloud lub na dowolnym niestandardowym serwerze

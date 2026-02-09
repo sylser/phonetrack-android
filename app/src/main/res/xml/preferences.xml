@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory
+        android:title="@string/settings_network_category"
+        android:key="settings_network_category">
+    <Preference
+        android:icon="@drawable/ic_account_circle_grey_24dp"
+        android:title="@string/settings_server_settings">
+        <intent
+            android:targetClass="net.eneiluj.nextcloud.phonetrack.android.activity.SettingsActivity"
+            android:targetPackage="@string/applicationId" />
+    </Preference>
+
+        <PreferenceScreen
+            android:key="@string/pref_key_certs"
+            android:persistent="false"
+            android:icon="@drawable/ic_https_grey_24dp"
+            android:title="@string/settings_cert_category">
+            <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="@string/pref_key_trust_system_certs"
+                android:title="@string/settings_cert_trust_system"
+                android:summaryOn="@string/settings_cert_trust_system_on"
+                android:summaryOff="@string/settings_cert_trust_system_off" />
+            <Preference
+                android:key="@string/pref_key_reset_trust"
+                android:title="@string/settings_cert_reset"
+                android:summary="@string/settings_cert_reset_summary" />
+        </PreferenceScreen>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_logging_category"
+        android:key="settings_logging_category">
+
+    <ListPreference
+        android:icon="@drawable/ic_crosshairs_gps_grey_24dp"
+        android:key="@string/pref_key_providers"
+        android:summary=""
+        android:title="@string/settings_providers_title"
+        android:entryValues="@array/providersValues"
+        android:defaultValue="@string/pref_value_providers" />
+
+    <CheckBoxPreference
+        android:icon="@drawable/ic_power_grey_24dp"
+        android:key="@string/pref_key_autostart"
+        android:title="@string/pref_autostart_title"
+        android:summary="@string/pref_autostart_summary"
+        android:defaultValue="@string/pref_autostart_default" />
+
+    <CheckBoxPreference
+        android:icon="@drawable/ic_filter_3_grey_24dp"
+        android:key="@string/pref_key_shownbsynced"
+        android:title="@string/pref_shownbsynced_title"
+        android:summary="@string/pref_shownbsynced_summary"
+        android:defaultValue="@string/pref_shownbsynced_default" />
+
+        <CheckBoxPreference
+            android:icon="@drawable/ic_notifications_grey_24dp"
+            android:key="@string/pref_key_notification_importance"
+            android:title="@string/settings_notification_importance_title"
+            android:summary="@string/settings_notification_importance_subtitle" />
+
+        <CheckBoxPreference
+            android:icon="@drawable/ic_sync_grey_24dp"
+            android:key="@string/pref_key_reset_stats"
+            android:title="@string/settings_reset_stats"
+            android:summary="@string/settings_reset_stats_subtitle" />
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_theming_category"
+        android:key="settings_theming_category">
+
+    <SwitchPreferenceCompat
+        android:defaultValue="@string/pref_value_theme_light"
+        android:icon="@drawable/ic_brightness_2_grey_24dp"
+        android:key="@string/pref_key_theme"
+        android:summary="%s"
+        android:title="@string/settings_theme_title" />
+
+        <CheckBoxPreference
+            android:icon="@drawable/ic_palette_grey_24dp"
+            android:key="@string/pref_key_use_server_color"
+            android:title="@string/settings_use_server_color_title"
+            android:defaultValue="true"
+            android:summary="@string/settings_use_server_color_subtitle" />
+
+
+        <com.kizitonwose.colorpreferencecompat.ColorPreferenceCompat
+        android:defaultValue="@color/primary"
+        android:icon="@drawable/ic_palette_grey_24dp"
+        android:key="@string/pref_key_color"
+        android:summary="@string/settings_color_summary"
+        android:title="@string/settings_color_title"
+        app:colorShape="circle"
+        app:showDialog="false" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/settings_sms_category"
+        android:key="settings_sms_category">
+    <CheckBoxPreference
+        android:icon="@drawable/ic_sms_grey_24dp"
+        android:key="@string/pref_key_sms"
+        android:title="@string/settings_sms"
+        android:summary="@string/settings_sms_subtitle" />
+
+    <EditTextPreference
+        android:id="@+id/editSmsKeyword"
+        android:defaultValue="phonetrack"
+        android:icon="@drawable/ic_key_grey_24dp"
+        android:dialogMessage="@string/settings_sms_keyword_long"
+        android:dialogTitle="@string/settings_sms_keyword_title"
+        android:key="@string/pref_key_sms_keyword"
+        android:singleLine="true"
+        android:selectAllOnFocus="true"
+        android:persistent="true"
+        android:summary="phonetrack"
+        android:title="@string/settings_sms_keyword_title" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_saving_category"
+        android:key="settings_saving_category">
+        <CheckBoxPreference
+            android:icon="@drawable/ic_power_plug_grey_24dp"
+            android:key="@string/pref_key_power_saving_awareness"
+            android:title="@string/settings_power_saving_awareness_title"
+            android:summary="@string/settings_power_saving_awareness_subtitle" />
+        <CheckBoxPreference
+            android:icon="@drawable/ic_airplanemode_inactive_grey_24dp"
+            android:key="@string/pref_key_offline_mode_awareness"
+            android:title="@string/settings_offline_mode_awareness_title"
+            android:summary="@string/settings_offline_mode_awareness_subtitle" />
+        <EditTextPreference
+            android:id="@+id/editGroupSync"
+            android:defaultValue="0"
+            android:icon="@drawable/ic_group_work_grey_24dp"
+            android:dialogMessage="@string/settings_group_sync_long"
+            android:dialogTitle="@string/settings_group_sync_title"
+            android:key="@string/pref_key_group_sync"
+            android:singleLine="true"
+            android:selectAllOnFocus="true"
+            android:persistent="true"
+            android:summary="0"
+            android:dialogLayout="@layout/preference_edit_text_integer"
+            android:title="@string/settings_group_sync_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_map_category"
+        android:key="settings_map_category">
+
+        <Preference
+            android:key="@string/pref_key_osmdroid_load"
+            android:id="@+id/loadOsmdroidPath"
+            android:icon="@drawable/ic_folder_grey600_24dp"
+            android:title="@string/settings_osmdroid_label">
+
+        </Preference>
+
+        <Preference
+            android:key="@string/pref_key_osmdroid_delete"
+            android:id="@+id/deleteOsmdroidFile"
+            android:icon="@drawable/ic_delete_grey_24dp"
+            android:title="@string/settings_osmdroid_delete_label">
+
+        </Preference>
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/settings_debug_category"
+        android:key="settings_debug_category">
+
+    <Preference
+            android:key="@string/pref_key_open_syslog"
+            android:id="@+id/openSyslogManager"
+            android:icon="@drawable/ic_baseline_list_alt_24"
+            android:title="@string/settings_syslog_label" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

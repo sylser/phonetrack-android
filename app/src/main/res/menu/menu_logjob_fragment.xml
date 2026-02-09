@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_share"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:orderInCategory="80"
+        android:title="@string/menu_share"
+        app:showAsAction="never"
+        app:actionProviderClass="androidx.appcompat.widget.ShareActionProvider" />
+    <item
+        android:id="@+id/menu_selectSession"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:orderInCategory="83"
+        android:title="@string/menu_select_session"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_fromLogUrl"
+        android:icon="@drawable/ic_clear_white_24dp"
+        android:orderInCategory="82"
+        android:title="@string/menu_from_url"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_delete"
+        android:icon="@drawable/ic_delete_grey_24dp"
+        android:orderInCategory="87"
+        android:title="@string/menu_delete"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/menu_bike"
+        android:icon="@drawable/ic_directions_bike_white_24dp"
+        android:orderInCategory="83"
+        android:title="@string/menu_preset_bike"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_walk"
+        android:icon="@drawable/ic_walk_grey_24dp"
+        android:orderInCategory="83"
+        android:title="@string/menu_preset_walk"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_drive"
+        android:icon="@drawable/ic_directions_car_white_24dp"
+        android:orderInCategory="83"
+        android:title="@string/menu_preset_drive"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_battery"
+        android:icon="@drawable/ic_battery_90_white_24dp"
+        android:orderInCategory="83"
+        android:title="@string/menu_preset_battery"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/menu_precision"
+        android:icon="@drawable/ic_accuracy_grey_24dp"
+        android:orderInCategory="83"
+        android:title="@string/menu_preset_precision"
+        app:showAsAction="never" />
+
+
+</menu>
