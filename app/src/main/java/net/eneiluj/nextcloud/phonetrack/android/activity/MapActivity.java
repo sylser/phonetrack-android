@@ -1618,24 +1618,8 @@ public class MapActivity extends AppCompatActivity {
             map.setTileProvider(defaultTileProvider);
         }
         
-        // 当图层改变时，重新处理用户位置的坐标转换
-        if (mLocationOverlay != null && mLocationOverlay.getMyLocation() != null) {
-            GeoPoint currentGeoPoint = mLocationOverlay.getMyLocation();
-            Location currentLocation = new Location("");
-            currentLocation.setLatitude(currentGeoPoint.getLatitude());
-            currentLocation.setLongitude(currentGeoPoint.getLongitude());
-            if (("高德地图".equals(layerKey) || "高德卫星".equals(layerKey))) {
-                // 如果切换到高德地图，转换当前用户位置
-                double[] gcjCoords = wgs2gcj(currentLocation.getLatitude(), currentLocation.getLongitude());
-                Location transformedLocation = new Location(currentLocation);
-                transformedLocation.setLatitude(gcjCoords[0]);
-                transformedLocation.setLongitude(gcjCoords[1]);
-                mLocationOverlay.onLocationChanged(transformedLocation, mLocationOverlay.getMyLocationProvider());
-            } else {
-                // 如果切换到非高德地图，使用原始位置
-                mLocationOverlay.onLocationChanged(currentLocation, mLocationOverlay.getMyLocationProvider());
-            }
-        }
+        // 图层改变时，无需手动触发位置更新，坐标转换已在onLocationChanged中处理
+        // 切换图层只需更换瓦片源，位置标记会自动按新图层要求显示
     }
 
     protected Set<File> findMapFiles() {
