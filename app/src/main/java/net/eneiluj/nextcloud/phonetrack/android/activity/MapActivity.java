@@ -23,6 +23,7 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -76,6 +77,7 @@ import net.eneiluj.nextcloud.phonetrack.util.ThemeUtils;
 import org.mapsforge.map.android.rendertheme.AssetsRenderTheme;
 import org.mapsforge.map.rendertheme.XmlRenderTheme;
 import org.osmdroid.api.IMapController;
+import org.osmdroid.api.IMapView;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.mapsforge.MapsForgeTileProvider;
 import org.osmdroid.mapsforge.MapsForgeTileSource;
@@ -96,6 +98,7 @@ import org.osmdroid.views.overlay.Polyline;
 import org.osmdroid.views.overlay.ScaleBarOverlay;
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
+import org.osmdroid.views.overlay.mylocation.IMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
 import java.io.File;
@@ -317,7 +320,29 @@ public class MapActivity extends AppCompatActivity {
         map.setMultiTouchControls(true);
         map.getZoomController().setVisibility(CustomZoomButtonsController.Visibility.ALWAYS);
 
-        this.mLocationOverlay = new MyLocationNewOverlay(new GpsMyLocationProvider(ctx), map);
+        // 创建自定义的MyLocationOverlay，支持坐标转换
+        GpsMyLocationProvider locationProvider = new GpsMyLocationProvider(ctx);
+        this.mLocationOverlay = new MyLocationNewOverlay(locationProvider, map) {
+            @Override
+            public void onLocationChanged(Location location, IMyLocationProvider source) {
+                if ("高德地图".equals(selectedLayer) || "高德卫星".equals(selectedLayer)) {
+                    // 对于高德地图，进行坐标转换
+                    double[] gcjCoords = wgs2gcj(location.getLatitude(), location.getLongitude());
+                    
+                    // 创建新的位置对象，带有转换后的坐标
+                    Location transformedLocation = new Location(location);
+                    transformedLocation.setLatitude(gcjCoords[0]);
+                    transformedLocation.setLongitude(gcjCoords[1]);
+                    
+                    // 调用父类方法，使用转换后的坐标
+                    super.onLocationChanged(transformedLocation, source);
+                } else {
+                    // 对于其他地图，使用原始位置
+                    super.onLocationChanged(location, source);
+                }
+            }
+        };
+        
         Bitmap iconPos = BitmapFactory.decodeResource(ctx.getResources(), R.mipmap.ic_my_position)
                 .copy(Bitmap.Config.ARGB_8888, true);
         iconPos = Bitmap.createScaledBitmap(iconPos, 70, 70, true);
@@ -1591,6 +1616,25 @@ public class MapActivity extends AppCompatActivity {
             defaultTileProvider = new MapTileProviderBasic(getApplicationContext());
             defaultTileProvider.setTileSource(layersMap.get(layerKey));
             map.setTileProvider(defaultTileProvider);
+        }
+        
+        // 当图层改变时，重新处理用户位置的坐标转换
+        if (mLocationOverlay != null && mLocationOverlay.getMyLocation() != null) {
+            GeoPoint currentGeoPoint = mLocationOverlay.getMyLocation();
+            Location currentLocation = new Location("");
+            currentLocation.setLatitude(currentGeoPoint.getLatitude());
+            currentLocation.setLongitude(currentGeoPoint.getLongitude());
+            if (("高德地图".equals(layerKey) || "高德卫星".equals(layerKey))) {
+                // 如果切换到高德地图，转换当前用户位置
+                double[] gcjCoords = wgs2gcj(currentLocation.getLatitude(), currentLocation.getLongitude());
+                Location transformedLocation = new Location(currentLocation);
+                transformedLocation.setLatitude(gcjCoords[0]);
+                transformedLocation.setLongitude(gcjCoords[1]);
+                mLocationOverlay.onLocationChanged(transformedLocation, mLocationOverlay.getMyLocationProvider());
+            } else {
+                // 如果切换到非高德地图，使用原始位置
+                mLocationOverlay.onLocationChanged(currentLocation, mLocationOverlay.getMyLocationProvider());
+            }
         }
     }
 
