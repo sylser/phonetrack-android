@@ -1239,14 +1239,21 @@ public class MapActivity extends AppCompatActivity {
             markerDrawable = markerDrawables.get(devName);
             int currentColor = markerDrawable.getColor();
             Double currentAccuracy = markerDrawable.getAccuracy();
-            if (color != currentColor || currentAccuracy.equals(lastLoc.getAccuracy())) {
+            boolean accuracyChanged = (currentAccuracy != null) ? 
+                !currentAccuracy.equals(lastLoc.getAccuracy()) : 
+                (lastLoc.getAccuracy() != null);
+            
+            if (color != currentColor || accuracyChanged) {
                 int textColor;
                 if (ThemeUtils.isBrightColor(color)) {
                     textColor = android.R.color.black;
                 } else {
                     textColor = android.R.color.white;
                 }
-                markerDrawable.update(color, textColor, lastLoc.getAccuracy());
+                markerDrawable.update(color, textColor, lastLoc.getAccuracy(), lastLoc.getTimestamp());
+            } else {
+                // Just update the time without recreating the bitmap for performance
+                markerDrawable.updateTime(lastLoc.getTimestamp());
             }
         }
         // create the marker
@@ -1258,7 +1265,7 @@ public class MapActivity extends AppCompatActivity {
             } else {
                 textColor = android.R.color.white;
             }
-            markerDrawable = new CustomLocationMarkerDrawable(R.mipmap.ic_marker, devName.substring(0, 1), color, textColor, lastLoc.getAccuracy());
+            markerDrawable = new CustomLocationMarkerDrawable(R.mipmap.ic_marker, devName.substring(0, 1), color, textColor, lastLoc.getAccuracy(), lastLoc.getTimestamp());
             m.setIcon(markerDrawable);
 
             map.getOverlays().add(m);
@@ -1670,7 +1677,7 @@ public class MapActivity extends AppCompatActivity {
     }
 
     /**
-     * Marker drawable icon with accuracy
+     * Marker drawable icon with accuracy and time label
      */
     private class CustomLocationMarkerDrawable extends Drawable  {
         // Cached values
@@ -1678,6 +1685,7 @@ public class MapActivity extends AppCompatActivity {
         final int mDrawableId;
         private Double mAccuracy;
         private int mColor;
+        private long mTimestamp; // Added for time display
 
         // Main part of the icon, which is only regenerated on colour change
         private Bitmap mBitmap;
@@ -1685,6 +1693,7 @@ public class MapActivity extends AppCompatActivity {
         private final Paint mPaint;
         private final Paint mAccuracyPaint;
         private final Paint mAccuracyBorderPaint;
+        private final Paint mTimeLabelPaint; // New paint for time label
 
         /**
          * Constructor
@@ -1693,19 +1702,28 @@ public class MapActivity extends AppCompatActivity {
          * @param markerColor Primary color
          * @param textColorId Text color
          * @param accuracy Location accuracy
+         * @param timestamp Location timestamp for time display
          */
-        public CustomLocationMarkerDrawable(int drawableId, String text, int markerColor, int textColorId, Double accuracy) {
+        public CustomLocationMarkerDrawable(int drawableId, String text, int markerColor, int textColorId, Double accuracy, long timestamp) {
             // Cache values
             mLetter = text;
             mDrawableId = drawableId;
+            mTimestamp = timestamp; // Added timestamp
 
             // Create paints
             mPaint = new Paint();
             mAccuracyPaint = new Paint();
             mAccuracyBorderPaint = new Paint();
+            
+            // Create paint for time label
+            mTimeLabelPaint = new Paint();
+            mTimeLabelPaint.setAntiAlias(true);
+            mTimeLabelPaint.setTextAlign(Paint.Align.CENTER);
+            mTimeLabelPaint.setTextSize(24); // Smaller font for time label
+            mTimeLabelPaint.setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.NORMAL));
 
             // Initialize icon and accuracy paints
-            update(markerColor, textColorId, accuracy);
+            update(markerColor, textColorId, accuracy, timestamp);
         }
 
         /**
@@ -1713,13 +1731,15 @@ public class MapActivity extends AppCompatActivity {
          * @param markerColor Primary color
          * @param textColorId Text color
          * @param accuracy Location accuracy
+         * @param timestamp Location timestamp for time display
          */
-        public void update(int markerColor, int textColorId, Double accuracy) {
+        public void update(int markerColor, int textColorId, Double accuracy, long timestamp) {
             mBitmap = BitmapFactory.decodeResource(ctx.getResources(), mDrawableId).copy(Bitmap.Config.ARGB_8888, true);
             mBitmap = Bitmap.createScaledBitmap(mBitmap, 70, 70, true);
 
             // Cache for use updating accuracy circle
             mColor = markerColor;
+            mTimestamp = timestamp; // Update timestamp
 
             Canvas canvas = new Canvas(mBitmap);
             Paint paintCol = new Paint();
@@ -1757,6 +1777,17 @@ public class MapActivity extends AppCompatActivity {
             mAccuracyBorderPaint.setStyle(Paint.Style.STROKE);
             mAccuracyBorderPaint.setColor(mColor);
             mAccuracyBorderPaint.setAlpha(180);
+            
+            // Update time label paint
+            int timeTextColor = ContextCompat.getColor(ctx, ThemeUtils.isBrightColor(markerColor) ? android.R.color.black : android.R.color.white);
+            mTimeLabelPaint.setColor(timeTextColor);
+        }
+
+        /**
+         * Update only the timestamp without recreating the bitmap
+         */
+        public void updateTime(long timestamp) {
+            mTimestamp = timestamp;
         }
 
         public Double getAccuracy() {
@@ -1765,6 +1796,10 @@ public class MapActivity extends AppCompatActivity {
 
         public int getColor() {
             return mColor;
+        }
+
+        public long getTimestamp() {
+            return mTimestamp;
         }
 
         @Override
@@ -1784,6 +1819,30 @@ public class MapActivity extends AppCompatActivity {
 
             // Draw main icon
             canvas.drawBitmap(mBitmap, bounds.centerX() - mBitmap.getWidth() / 2f, bounds.centerY() + mBitmap.getHeight() / 2f - mBitmap.getHeight(), mPaint);
+
+            // Draw time label below the marker
+            if (mTimestamp > 0) {
+                // Format timestamp to yyyy-MM-dd HH:mm:ss
+                String timeText = sdfCompleteSimple.format(new Date(mTimestamp * 1000));
+                
+                // Draw background rectangle for time label
+                float timeLabelWidth = mTimeLabelPaint.measureText(timeText);
+                float padding = 8f;
+                float rectLeft = bounds.centerX() - timeLabelWidth / 2f - padding;
+                float rectTop = bounds.centerY() + getIntrinsicHeight() + 5f; // Position below marker
+                float rectRight = bounds.centerX() + timeLabelWidth / 2f + padding;
+                float rectBottom = rectTop + mTimeLabelPaint.getTextSize() + padding * 1.5f;
+                
+                // Draw semi-transparent background (30% opacity / 70% transparency)
+                Paint bgPaint = new Paint();
+                bgPaint.setColor(Color.argb(77, 0, 0, 0)); // 30% opacity (~77 out of 255)
+                bgPaint.setStyle(Paint.Style.FILL);
+                bgPaint.setAntiAlias(true);
+                canvas.drawRect(rectLeft, rectTop, rectRight, rectBottom, bgPaint);
+                
+                // Draw text on top of background
+                canvas.drawText(timeText, bounds.centerX(), rectBottom - padding, mTimeLabelPaint);
+            }
 
             // Debug marker
             // canvas.drawCircle(bounds.centerX(), bounds.centerY() + getIntrinsicHeight()/2, 5, mPaint);
