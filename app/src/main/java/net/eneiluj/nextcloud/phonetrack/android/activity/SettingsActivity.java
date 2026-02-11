@@ -24,6 +24,9 @@ import com.google.android.material.textfield.TextInputLayout;
 import com.nextcloud.android.sso.helper.SingleAccountHelper;
 import com.nextcloud.android.sso.model.SingleSignOnAccount;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Handler;
@@ -42,6 +45,7 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -128,6 +132,16 @@ public class SettingsActivity extends AppCompatActivity {
         password_wrapper = findViewById(R.id.settings_password_wrapper);
         btn_submit = findViewById(R.id.settings_submit);
         urlWarnHttp = findViewById(R.id.settings_url_warn_http);
+
+        ScrollView scrollView = findViewById(R.id.account_settings_layout);
+        if (scrollView != null) {
+            scrollView.setClipToPadding(false);
+            ViewCompat.setOnApplyWindowInsetsListener(scrollView, (v, insets) -> {
+                Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+                return insets;
+            });
+        }
 
         /*if (ContextCompat.checkSelfPermission(this, Manifest.permission.GET_ACCOUNTS)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -361,6 +375,12 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings_webview);
         webView = findViewById(R.id.login_webview);
         webView.setVisibility(View.GONE);
+
+        ViewCompat.setOnApplyWindowInsetsListener(webView, (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
         final ProgressBar progressBar = findViewById(R.id.login_webview_progress_bar);
 

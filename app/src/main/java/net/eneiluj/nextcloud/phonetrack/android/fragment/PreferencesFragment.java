@@ -31,7 +31,9 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreferenceCompat;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import android.provider.OpenableColumns;
 import android.util.Log;
@@ -99,10 +101,17 @@ public class PreferencesFragment extends PreferenceFragmentCompat implements Pre
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        RecyclerView recyclerView = getListView();
+        androidx.recyclerview.widget.RecyclerView recyclerView = getListView();
         DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(),
                 DividerItemDecoration.VERTICAL);
         recyclerView.addItemDecoration(dividerItemDecoration);
+        recyclerView.setClipToPadding(false);
+        ViewCompat.setOnApplyWindowInsetsListener(recyclerView, (v, insets) -> {
+            androidx.recyclerview.widget.RecyclerView rv = (androidx.recyclerview.widget.RecyclerView) v;
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            rv.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
     }
 
     @Override
