@@ -303,11 +303,11 @@ public class MapActivity extends AppCompatActivity {
 
         setupMapTileProviders();
 
-        selectedLayer = prefs.getString("map_selected_layer", "OpenStreetMap Mapnik");
+        selectedLayer = prefs.getString("map_selected_layer", "高德地图");
         if (!layersMap.containsKey(selectedLayer)) {
             // selected layer was removed
-            selectedLayer = "OpenStreetMap Mapnik";
-            prefs.edit().putString("map_selected_layer", "OpenStreetMap Mapnik").apply();
+            selectedLayer = "高德地图";
+            prefs.edit().putString("map_selected_layer", "高德地图").apply();
         }
         setTileSource(selectedLayer);
 
@@ -378,6 +378,70 @@ public class MapActivity extends AppCompatActivity {
 
     private void setupMapTileProviders() {
         layersMap = new HashMap<>();
+        
+        // 高德地图 - 标准矢量地图（中文标签，style=7）
+        layersMap.put(
+                "高德地图",
+                new OnlineTileSourceBase(
+                        "GaodeMap", 1, 18, 256,
+                        ".png",
+                        new String[]{
+                                "https://wprd01.is.autonavi.com",
+                                "https://wprd02.is.autonavi.com",
+                                "https://wprd03.is.autonavi.com",
+                                "https://wprd04.is.autonavi.com"
+                        },
+                        "高德地图瓦片") {
+                    @Override
+                    public String getTileURLString(long pMapTileIndex) {
+                        return getBaseUrl() 
+                                + "/appmaptile?lang=zh_cn&size=1&scl=1&style=7&x="
+                                + MapTileIndex.getX(pMapTileIndex) 
+                                + "&y=" + MapTileIndex.getY(pMapTileIndex) 
+                                + "&z=" + MapTileIndex.getZoom(pMapTileIndex);
+                    }
+                }
+        );
+        
+        // 高德卫星 - 卫星地图（style=6）
+        layersMap.put(
+                "高德卫星",
+                new OnlineTileSourceBase(
+                        "GaodeSatellite", 1, 18, 256,
+                        ".png",
+                        new String[]{
+                                "https://wprd01.is.autonavi.com",
+                                "https://wprd02.is.autonavi.com",
+                                "https://wprd03.is.autonavi.com",
+                                "https://wprd04.is.autonavi.com"
+                        },
+                        "高德卫星瓦片") {
+                    @Override
+                    public String getTileURLString(long pMapTileIndex) {
+                        return getBaseUrl() 
+                                + "/appmaptile?style=6&x="
+                                + MapTileIndex.getX(pMapTileIndex) 
+                                + "&y=" + MapTileIndex.getY(pMapTileIndex) 
+                                + "&z=" + MapTileIndex.getZoom(pMapTileIndex);
+                    }
+                }
+        );
+        
+        // 注释掉其他所有图层
+        /*
+        layersMap.put(
+                "OSM Humanitarian",
+                new XYTileSource(
+                        "OSMHumanitarian", 1, 19, 256,
+                        ".png",
+                        new String[]{
+                                "https://a.tile.openstreetmap.fr/hot/",
+                                "https://b.tile.openstreetmap.fr/hot/",
+                                "https://c.tile.openstreetmap.fr/hot/"
+                        },
+                        "OSM Humanitarian (https://openstreetmap.fr/)"
+                )
+        );
         layersMap.put("OpenStreetMap Mapnik", TileSourceFactory.MAPNIK);
         layersMap.put("Hike bike map", TileSourceFactory.HIKEBIKEMAP);
         layersMap.put("OpenTopoMap", TileSourceFactory.OpenTopo);
@@ -428,8 +492,9 @@ public class MapActivity extends AppCompatActivity {
                     }
                 }
         );
+        */
 
-        // MAPSFORGE
+        // MAPSFORGE - 保留离线地图支持
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED) {
             declareMapsForgeProvider();
@@ -457,7 +522,16 @@ public class MapActivity extends AppCompatActivity {
         File[] maps = new File[mapfiles.size()];
         maps = mapfiles.toArray(maps);
         if (maps == null || maps.length == 0) {
-            mapsForgeTileProvider = null;
+            // Return default provider if no offline maps are available
+             // Use the first available tile source as fallback
+             MapTileProviderBasic basicProvider = new MapTileProviderBasic(getApplicationContext());
+             if(layersMap.containsKey("高德地图")) {
+                 basicProvider.setTileSource(layersMap.get("高德地图"));
+             } else {
+                 // Fallback to a basic online source if 高德地图 is not available
+                 basicProvider.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE);
+             }
+             return null; // Return null to indicate no offline maps are available
         } else {
             XmlRenderTheme theme = null;
             try {
@@ -937,7 +1011,17 @@ public class MapActivity extends AppCompatActivity {
 
             geoPoints = new ArrayList<>();
             for (BasicLocation loc : locationsToDisplay) {
-                geoPoints.add(new GeoPoint(loc.getLat(), loc.getLon()));
+                double lat = loc.getLat();
+                double lon = loc.getLon();
+                
+                // Apply coordinate transformation if using 高德地图
+                if ("高德地图".equals(selectedLayer) || "高德卫星".equals(selectedLayer)) {
+                    double[] gcjCoords = wgs2gcj(lat, lon);
+                    lat = gcjCoords[0];
+                    lon = gcjCoords[1];
+                }
+                
+                geoPoints.add(new GeoPoint(lat, lon));
             }
             lines.get(devName).setPoints(geoPoints);
             displayedLocations.put(devName, locationsToDisplay);
@@ -1083,17 +1167,14 @@ public class MapActivity extends AppCompatActivity {
                 devLocations.addAll(locs);
             } else {
                 for (BasicLocation loc : locs) {
-                    Log.v(TAG, "AAAAA "+loc.getTimestamp()+" > "+ lastDevTs);
                     if (loc.getTimestamp() > lastDevTs) {
                         locationsToAdd.add(loc);
                     }
                 }
                 devLocations.addAll(locationsToAdd);
-                Log.v(TAG, "existing dev "+devName+" ADD "+locationsToAdd.size()+" locations");
             }
         }
         List<BasicLocation> deviceLocations = locations.get(devName);
-        Log.v(TAG, "deviceLocations size " + deviceLocations.size() + " access " + (deviceLocations.size()-1));
         BasicLocation lastLoc = deviceLocations.get(deviceLocations.size()-1);
         lastTimestamps.put(devName, lastLoc.getTimestamp());
 
@@ -1188,7 +1269,17 @@ public class MapActivity extends AppCompatActivity {
         }
         m.setTitle(text);
         if (locationsToAdd.size() > 0) {
-            m.setPosition(new GeoPoint(lastLoc.getLat(), lastLoc.getLon()));
+            double lat = lastLoc.getLat();
+            double lon = lastLoc.getLon();
+            
+            // Apply coordinate transformation if using 高德地图
+            if ("高德地图".equals(selectedLayer) || "高德卫星".equals(selectedLayer)) {
+                double[] gcjCoords = wgs2gcj(lat, lon);
+                lat = gcjCoords[0];
+                lon = gcjCoords[1];
+            }
+            
+            m.setPosition(new GeoPoint(lat, lon));
         }
     }
 
@@ -1219,7 +1310,6 @@ public class MapActivity extends AppCompatActivity {
                     break;
                 }
             }
-            Log.v("FIFI", "time filtering "+firstIndex+" "+lastIndex);
             result = locations.subList(firstIndex, lastIndex);
         }
         return result;
@@ -1483,7 +1573,20 @@ public class MapActivity extends AppCompatActivity {
         // it seems they are destoryed/detached when an other one is selected
         // so here, we create a new one each time
         if (layerKey.equals("MapsForge")) {
-            map.setTileProvider(getMapsForgeTileProvider());
+            MapsForgeTileProvider forgeProvider = getMapsForgeTileProvider();
+            if (forgeProvider != null) {
+                map.setTileProvider(forgeProvider);
+            } else {
+                // If no offline maps are available, fall back to 高德地图
+                defaultTileProvider = new MapTileProviderBasic(getApplicationContext());
+                if (layersMap.containsKey("高德地图")) {
+                    defaultTileProvider.setTileSource(layersMap.get("高德地图"));
+                } else {
+                    // Ultimate fallback
+                    defaultTileProvider.setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE);
+                }
+                map.setTileProvider(defaultTileProvider);
+            }
         } else {
             defaultTileProvider = new MapTileProviderBasic(getApplicationContext());
             defaultTileProvider.setTileSource(layersMap.get(layerKey));
@@ -1691,6 +1794,54 @@ public class MapActivity extends AppCompatActivity {
     /**
      * Broadcast receiver
      */
+    // WGS-84 to GCJ-02 coordinate conversion methods for 高德地图
+    private static final double PI = 3.1415926535897932384626;
+    private static final double A = 6378245.0;
+    private static final double EE = 0.00669342162296594323;
+
+    private boolean outOfChina(double lat, double lon) {
+        if (lon < 72.004 || lon > 137.8347) {
+            return true;
+        }
+        if (lat < 0.8293 || lat > 55.8271) {
+            return true;
+        }
+        return false;
+    }
+
+    private double transformLat(double x, double y) {
+        double ret = -100.0 + 2.0 * x + 3.0 * y + 0.2 * y * y + 0.1 * x * y + 0.2 * Math.sqrt(Math.abs(x));
+        ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+        ret += (20.0 * Math.sin(y * PI) + 40.0 * Math.sin(y / 3.0 * PI)) * 2.0 / 3.0;
+        ret += (160.0 * Math.sin(y / 12.0 * PI) + 320 * Math.sin(y * PI / 30.0)) * 2.0 / 3.0;
+        return ret;
+    }
+
+    private double transformLon(double x, double y) {
+        double ret = 300.0 + x + 2.0 * y + 0.1 * x * x + 0.1 * x * y + 0.1 * Math.sqrt(Math.abs(x));
+        ret += (20.0 * Math.sin(6.0 * x * PI) + 20.0 * Math.sin(2.0 * x * PI)) * 2.0 / 3.0;
+        ret += (20.0 * Math.sin(x * PI) + 40.0 * Math.sin(x / 3.0 * PI)) * 2.0 / 3.0;
+        ret += (150.0 * Math.sin(x / 12.0 * PI) + 300.0 * Math.sin(x / 30.0 * PI)) * 2.0 / 3.0;
+        return ret;
+    }
+
+    public double[] wgs2gcj(double wgLat, double wgLon) {
+        if (outOfChina(wgLat, wgLon)) {
+            return new double[] {wgLat, wgLon};
+        }
+        double dLat = transformLat(wgLon - 105.0, wgLat - 35.0);
+        double dLon = transformLon(wgLon - 105.0, wgLat - 35.0);
+        double radLat = wgLat / 180.0 * PI;
+        double magic = Math.sin(radLat);
+        magic = 1 - EE * magic * magic;
+        double sqrtMagic = Math.sqrt(magic);
+        dLat = (dLat * 180.0) / ((A * (1 - EE)) / (magic * sqrtMagic) * PI);
+        dLon = (dLon * 180.0) / (A / sqrtMagic * Math.cos(radLat) * PI);
+        double mgLat = wgLat + dLat;
+        double mgLon = wgLon + dLon;
+        return new double[] {mgLat, mgLon};
+    }
+
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
